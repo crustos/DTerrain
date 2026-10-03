@@ -100,11 +100,7 @@ Three things make it so, and each has a direct fix.
 
 ### Plan, in order
 
-1. **Repository.** 210 MB of Unity's generated `Library/` (8,638 files) is
-   committed: the root `.gitignore` says `/[Ll]ibrary/`, which only matches a
-   Library at the repository root, and the project is in
-   `Destructible Terrain/`. Ignore the project's `Library/`, `obj/`, `Temp/` and
-   `Logs/` and remove them from the index; Unity regenerates them.
+
 2. **Model as values.** `Range` a struct; `Column`'s ranges a list of them.
    crust: `List.Remove` / `IndexOf` / `Contains` through a user-defined
    `Equals` (today it refuses anything but primitives and enums).
