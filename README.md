@@ -61,11 +61,18 @@ Every change keeps the source plain C# that Unity compiles as before.
 
 ### Status
 
-8 of the 28 scripts translate through crust's C# subset on their own: `Range`,
-`Shape`, `UnityExtensions` and the interfaces (`IChunk`, `IChunkCollider`,
-`ILayer`, `ITextureSource`, `ITextureGenerator`). The rest stop at a named line
-with a reason: the MonoBehaviours belong to unity_pack, and the remaining gaps
-are listed under step 6.
+The model -- `Range`, `Column`, `Shape`, `PixelRect`, `ColumnQuadTree`, `RectMerge`, `ChainTrace` -- translates
+through crust's C# subset **and runs the same**: `Tests~/crust_equivalence.sh` runs 300 random chunk sets
+through the C# (mono) and through the translated C (gcc, AddressSanitizer / UBSan) and compares every
+rectangle and chain, which come out identical. Plain C# tests of the model are `Tests~/run.sh`. `UnityExtensions`
+and the interfaces (`IChunk`, `IChunkCollider`, `ILayer`, `ITextureSource`, `ITextureGenerator`) translate too.
+The MonoBehaviours belong to unity_pack, and the rest stop at a named line with a reason: the gaps are listed
+under step 6.
+
+What the model does for crust: algorithms take their lists and result objects as `ref` (lent, not copied; the
+same in Unity); `Range`'s `Equals(object)` and `IEquatable` are for Unity only (`#if CRUST` leaves them out; its
+`+` and `-` translate as they are) and `Column` removes a range with a loop; `ChainTrace` takes a neighbor chunk's border as a strip of pixels
+(`SetLeft` ...) rather than holding its list.
 
 ### Where the time goes, and what changes
 
@@ -101,9 +108,8 @@ Three things make it so, and each has a direct fix.
 ### Plan, in order
 
 
-2. **Model as values** (DONE ✔️). `Range` a struct; `Column`'s ranges a list of them.
-   crust: `List.Remove` / `IndexOf` / `Contains` through a user-defined
-   `Equals` (today it refuses anything but primitives and enums).
+2. **Model as values** (DONE ✔️). `Range` a struct; `Column`'s ranges a list of them. `Column` removes
+   a range with a loop (`RemoveEqual`, value equality), so crust needs no `List.Remove` through `Equals`.
 3. **Column-wise quadtree** (DONE ✔️; fix 1 above) -- a change in plain C#, faster in
    Unity as well.
 4. **Box2D shapes per chunk** (DONE ✔️, fix 2): one static body a chunk. `RectMerge` merges the
