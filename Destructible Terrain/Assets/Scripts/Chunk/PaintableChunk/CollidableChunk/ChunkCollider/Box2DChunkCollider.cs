@@ -26,7 +26,7 @@ namespace DTerrain
         /// <summary>True if the last rebuild had more rectangles than MaxShapes.</summary>
         public bool Overflow { get; private set; }
 
-        private readonly List<PixelRect> rects = new List<PixelRect>();
+        private List<PixelRect> rects = new List<PixelRect>();
 
 #if !CRUST
         private readonly List<BoxCollider2D> colliders = new List<BoxCollider2D>();
@@ -41,7 +41,7 @@ namespace DTerrain
             float ppu = textureSource.PPU;
 
             rects.Clear();
-            RectMerge.FromColumns(pixelData, rects);
+            RectMerge.FromColumns(ref pixelData, ref rects);
 
 #if CRUST
             int n = rects.Count;

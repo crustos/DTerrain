@@ -29,7 +29,7 @@ namespace DTerrain
         /// <summary>True if the last rebuild had more chains or points than the limits; the rest were cut.</summary>
         public bool Overflow { get; private set; }
 
-        private readonly ChainSet chains = new ChainSet();
+        private ChainSet chains = new ChainSet();
 
 #if !CRUST
         private readonly List<EdgeCollider2D> colliders = new List<EdgeCollider2D>();
@@ -44,18 +44,34 @@ namespace DTerrain
             int width = textureSource.Texture.width;
             int height = textureSource.Texture.height;
 
-            ChainTrace trace = new ChainTrace(pixelData, width, height);
+            ChainTrace trace = new ChainTrace(width, height);
             CollidableChunk chunk = GetComponent<CollidableChunk>();
             if (chunk != null)
             {
-                if (chunk.LeftNeighbor != null) trace.Left = chunk.LeftNeighbor.Columns;
-                if (chunk.RightNeighbor != null) trace.Right = chunk.RightNeighbor.Columns;
-                if (chunk.DownNeighbor != null) trace.Down = chunk.DownNeighbor.Columns;
-                if (chunk.UpNeighbor != null) trace.Up = chunk.UpNeighbor.Columns;
+                if (chunk.LeftNeighbor != null)
+                {
+                    List<Column> cols = chunk.LeftNeighbor.Columns;
+                    trace.SetLeft(ref cols);
+                }
+                if (chunk.RightNeighbor != null)
+                {
+                    List<Column> cols = chunk.RightNeighbor.Columns;
+                    trace.SetRight(ref cols);
+                }
+                if (chunk.DownNeighbor != null)
+                {
+                    List<Column> cols = chunk.DownNeighbor.Columns;
+                    trace.SetDown(ref cols);
+                }
+                if (chunk.UpNeighbor != null)
+                {
+                    List<Column> cols = chunk.UpNeighbor.Columns;
+                    trace.SetUp(ref cols);
+                }
             }
 
             chains.Clear();
-            trace.Trace(chains);
+            trace.Trace(ref pixelData, ref chains);
 
             //The chains that fit the limits, in order
             int fit = 0;

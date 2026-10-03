@@ -30,7 +30,7 @@ namespace DTerrain
             rects = new List<Rect>();
 
             List<PixelRect> pixelRects = new List<PixelRect>();
-            ColumnQuadTree.Build(pixelData, 0, 0, textureSize.x, textureSize.y, pixelRects);
+            ColumnQuadTree.Build(ref pixelData, 0, 0, textureSize.x, textureSize.y, ref pixelRects);
             foreach (PixelRect p in pixelRects)
                 rects.Add(new Rect(p.X / PPU, p.Y / PPU, p.W / PPU, p.H / PPU));
 
