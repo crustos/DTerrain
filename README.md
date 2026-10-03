@@ -101,14 +101,20 @@ Three things make it so, and each has a direct fix.
 ### Plan, in order
 
 
-2. **Model as values.** `Range` a struct; `Column`'s ranges a list of them.
+2. **Model as values** (DONE ✔️). `Range` a struct; `Column`'s ranges a list of them.
    crust: `List.Remove` / `IndexOf` / `Contains` through a user-defined
    `Equals` (today it refuses anything but primitives and enums).
-3. **Column-wise quadtree** (fix 1 above) -- a change in plain C#, faster in
+3. **Column-wise quadtree** (DONE ✔️; fix 1 above) -- a change in plain C#, faster in
    Unity as well.
-4. **Box2D shapes per chunk** (fix 2): one static body a chunk, rectangles
-   merged, then chains. In crust's unity_pack this is a chunk-collider kind that
-   the packed engine hands to Box2D-Packed, not a stream of AddComponent calls.
+4. **Box2D shapes per chunk** (DONE ✔️, fix 2): one static body a chunk. `RectMerge` merges the
+   column ranges into rectangles along rows (37% as many shapes as the quadtree on random data) and
+   `Box2DChunkCollider` hands them to Box2D-Packed as box shapes; `ChainTrace` traces the boundary
+   instead, and `Box2DChainChunkCollider` hands it over as chains (ground on the left of the way, a region
+   is one chain however large it is; the ends of a chain at a chunk border meet the neighbor chunk's,
+   which the layer links up and which rebuilds when the other side changes). In Unity the same two
+   colliders make `BoxCollider2D` / `EdgeCollider2D` components, without the `Find`. A chunk's rotation
+   when packed applies. unity_pack and Box2D-Packed carry the rest (kind 5, `Box2DTerrain`); see their
+   UNITY_PACK.md. Not done: a rotation that changes at run time, and PPU of 200 or more for chains.
 5. **Bounded counts.** The chunk grid follows from the texture size and the
    chunk count, both known when the game is packed: `[MaxInstances(N)]` on the
    chunk and layer classes, tables sized once. Per-chunk textures update in
